@@ -36,11 +36,29 @@ export const DemoModal: React.FC<DemoModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
       setStep(2);
     } else if (step === 2) {
+      try {
+        await fetch('/api/v1/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            company: formData.company,
+            storeType: formData.segment,
+            interest: formData.challenge,
+            message: `Faixa de faturamento: ${formData.revenue} | Horário preferido: ${formData.preferredDate}`,
+          }),
+        });
+      } catch (err) {
+        console.warn('[DemoModal] Lead save API call failed:', err);
+      }
+
       setStep(3);
       try {
         confetti({

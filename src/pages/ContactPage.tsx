@@ -33,8 +33,25 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      await fetch('/api/v1/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          storeType: formData.segment,
+          interest: `Funcionários: ${formData.employees}`,
+          message: formData.message,
+        }),
+      });
+    } catch (err) {
+      console.warn('[ContactPage] Lead save API call failed:', err);
+    }
     setSubmitted(true);
   };
 

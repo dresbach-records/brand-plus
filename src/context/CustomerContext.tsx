@@ -191,6 +191,21 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const refreshAll = async () => {
     setIsLoading(true);
     try {
+      // 1. Fetch live customer profile from Neon PostgreSQL API
+      try {
+        const profileRes = await fetch('/api/v1/customer/profile');
+        if (profileRes.ok) {
+          const data = await profileRes.json();
+          if (data.customer) setCustomer(data.customer);
+          if (data.company) setCompany(data.company);
+          if (data.subscription) setSubscription(data.subscription);
+          if (data.tenant) setTenant(data.tenant);
+        }
+      } catch (profileErr) {
+        console.warn('[CustomerContext] Live profile fetch fallback:', profileErr);
+      }
+
+      // 2. Fetch invoices
       const invs = await billingService.getInvoices(company.id);
       setInvoices(invs);
     } finally {

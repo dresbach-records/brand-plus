@@ -1,8 +1,18 @@
 import { Invoice } from '../types';
 
 class BillingService {
-  async getInvoices(companyId?: string): Promise<Invoice[]> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
+  async getInvoices(companyId: string = 'comp_requinte_001'): Promise<Invoice[]> {
+    try {
+      const res = await fetch(`/api/v1/invoices?companyId=${encodeURIComponent(companyId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return data;
+        }
+      }
+    } catch (err) {
+      console.warn('[BillingService] Fetch from API failed, using fallback:', err);
+    }
 
     const today = new Date();
     const lastMonth = new Date(today);
@@ -34,7 +44,7 @@ class BillingService {
         issueDate: lastMonth.toISOString(),
         dueDate: lastMonth.toISOString(),
         paymentDate: lastMonth.toISOString(),
-        paymentMethod: 'pix',
+        paymentMethod: 'credit_card',
         pdfUrl: '#',
         receiptUrl: '#',
         planName: 'BRAND+ Growth (Mensal)',
@@ -48,7 +58,7 @@ class BillingService {
         issueDate: twoMonthsAgo.toISOString(),
         dueDate: twoMonthsAgo.toISOString(),
         paymentDate: twoMonthsAgo.toISOString(),
-        paymentMethod: 'pix',
+        paymentMethod: 'credit_card',
         pdfUrl: '#',
         receiptUrl: '#',
         planName: 'BRAND+ Growth (Mensal)',
@@ -63,3 +73,4 @@ class BillingService {
 }
 
 export const billingService = new BillingService();
+

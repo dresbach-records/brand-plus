@@ -1,13 +1,10 @@
 import { Company, CompanyFormData } from '../types';
 
 /**
- * Service to manage Company data and profile.
- * Prepares the application for POST /api/v1/companies and PUT /api/v1/companies/:id
+ * Service to manage Company data and profile with Neon PostgreSQL backend.
  */
 class CustomerService {
   async registerCompany(companyData: CompanyFormData, customerId: string): Promise<Company> {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     const company: Company = {
       id: `comp_${Math.random().toString(36).substring(2, 9)}`,
       corporateName: companyData.corporateName,
@@ -35,9 +32,21 @@ class CustomerService {
   }
 
   async updateCompany(companyId: string, updates: Partial<Company>): Promise<Company> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    try {
+      const res = await fetch(`/api/v1/companies/${encodeURIComponent(companyId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (res.ok) {
+        return updates as Company;
+      }
+    } catch (err) {
+      console.warn('[CustomerService] Update company API call failed, applied locally:', err);
+    }
     return updates as Company;
   }
 }
 
 export const customerService = new CustomerService();
+

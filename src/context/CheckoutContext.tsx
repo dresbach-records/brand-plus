@@ -159,7 +159,30 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const submitOrder = async (): Promise<PaymentSessionResponse> => {
     setIsSubmitting(true);
     try {
-      // 1. Create account
+      // Try posting to Neon PostgreSQL backend API
+      try {
+        const dbRes = await fetch('/api/v1/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account,
+            company,
+            planId,
+            billingCycle,
+            payment,
+            orderSummary,
+          }),
+        });
+
+        if (dbRes.ok) {
+          const dbData = await dbRes.json();
+          console.log('[Checkout] Saved to Neon PostgreSQL:', dbData);
+        }
+      } catch (dbErr) {
+        console.warn('[Checkout] Failed to reach /api/v1/checkout, fallback to provider:', dbErr);
+      }
+
+      // 1. Create account locally/services
       const authRes = await authService.register({
         fullName: account.fullName,
         email: account.email,
@@ -171,7 +194,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const compRes = await customerService.registerCompany(company, authRes.customer.id);
 
       // 3. Create initial pending subscription
-      const subRes = await subscriptionService.createSubscription({
+      await subscriptionService.createSubscription({
         customerId: authRes.customer.id,
         companyId: compRes.id,
         planId: planId,
