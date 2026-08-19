@@ -1,0 +1,6 @@
+{
+  "name": "BRAND+ | Transformação Digital para o Varejo",
+  "description": "Plataforma SaaS B2B completa de transformação digital para o varejo: Vender, Gerenciar, Crescer e Aprender.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

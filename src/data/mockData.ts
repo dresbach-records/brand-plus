@@ -1,0 +1,841 @@
+import {
+  PlanTier,
+  PlanFeature,
+  IntegrationItem,
+  CaseStudy,
+  AcademyCourse,
+  BlogPost,
+  HelpCategory,
+} from '../types';
+
+export const PILLARS_DATA = [
+  {
+    id: 'commerce',
+    title: 'COMMERCE',
+    action: 'VENDER',
+    tagline: 'Crie sua presença digital e transforme visitantes em clientes.',
+    description: 'Sua loja online, catálogo digital, checkout de alta conversão e canais integrados para faturar 24 horas por dia.',
+    icon: 'ShoppingBag',
+    color: '#FF5500',
+    items: [
+      'Loja virtual personalizada',
+      'Catálogo digital interativo',
+      'Pedidos online multicanal',
+      'Checkout otimizado em 1 clique',
+      'Pagamentos seguros (PIX, Cartão, Boleto)',
+      'Promoções dinâmicas e cupons',
+    ],
+    route: '/produto/commerce' as const,
+  },
+  {
+    id: 'gestao',
+    title: 'BUSINESS & GESTÃO',
+    action: 'GERENCIAR',
+    tagline: 'Tenha sua operação organizada em um único lugar.',
+    description: 'Centralize produtos, estoque físico e online, pedidos, clientes e fluxo financeiro sem planilhas confusas.',
+    icon: 'Layers',
+    color: '#0F172A',
+    items: [
+      'Controle unificado de produtos e variações',
+      'Gestão de estoque em tempo real',
+      'Central de pedidos e expedição',
+      'Base de clientes e histórico de compras',
+      'CRM de relacionamento e fidelização',
+      'Controle financeiro e DRE simplificado',
+      'Indicadores operacionais ao vivo',
+    ],
+    route: '/produto/gestao' as const,
+  },
+  {
+    id: 'inteligencia',
+    title: 'INTELLIGENCE & AI',
+    action: 'CRESCER',
+    tagline: 'Transforme dados em oportunidades.',
+    description: 'Não mostramos apenas gráficos. Explicamos o que está acontecendo e recomendamos as melhores ações de faturamento e margem.',
+    icon: 'Sparkles',
+    color: '#FF5500',
+    items: [
+      'Copiloto de IA para diagnósticos em linguagem natural',
+      'Análise de margem real por produto e categoria',
+      'Recomendações preditivas de precificação',
+      'Automação de campanhas inteligentes',
+      'Detecção de gargalos e estoques parados',
+      'Segmentação avançada de clientes (RFM)',
+    ],
+    route: '/produto/inteligencia' as const,
+  },
+  {
+    id: 'academy',
+    title: 'ACADEMY',
+    action: 'APRENDER',
+    tagline: 'Desenvolva o conhecimento necessário para evoluir seu negócio.',
+    description: 'Tecnologia sem conhecimento não transforma um negócio. Cursos práticos, trilhas e guias criados por quem vive o varejo.',
+    icon: 'GraduationCap',
+    color: '#1E293B',
+    items: [
+      'BRAND+ Academy com certificações',
+      'Cursos do básico ao avançado',
+      'Guias e playbooks de operação digital',
+      'Trilhas personalizadas por segmento',
+      'Boas práticas de precificação e atendimento',
+      'Comunidade exclusiva de varejistas digitais',
+    ],
+    route: '/produto/academy' as const,
+  },
+];
+
+export const VERTICALS_DATA = [
+  {
+    id: 'moda',
+    name: 'Moda & Acessórios',
+    icon: 'Shirt',
+    description: 'Grade de cores e tamanhos, fotos em alta resolução, lookbook digital e controle ágil de coleções.',
+    metric: '+38% no ticket médio com compras coordenadas',
+  },
+  {
+    id: 'calcados',
+    name: 'Calçados',
+    icon: 'Footprints',
+    description: 'Matriz de numeração rápida, troca facilitada e controle de ponta de estoque.',
+    metric: '-45% no tempo de cadastro e controle de grade',
+  },
+  {
+    id: 'beleza',
+    name: 'Beleza & Cosméticos',
+    icon: 'Sparkles',
+    description: 'Recorrência de compras, kits personalizados, data de validade e recomendações de reposição.',
+    metric: '+52% de clientes recorrentes via CRM automático',
+  },
+  {
+    id: 'casa',
+    name: 'Casa & Decoração',
+    icon: 'Home',
+    description: 'Cálculo de frete fracionado para itens volumosos, fotos ambientadas e orçamentos online.',
+    metric: 'Redução de 60% nas dúvidas pré-venda',
+  },
+  {
+    id: 'eletronicos',
+    name: 'Eletrônicos & Informática',
+    icon: 'Smartphone',
+    description: 'Número de série, termos de garantia digital, especificações técnicas detalhadas e venda casada de acessórios.',
+    metric: '+28% em margem bruta com produtos complementares',
+  },
+  {
+    id: 'autopecas',
+    name: 'Autopeças & Moto',
+    icon: 'Wrench',
+    description: 'Busca por ano/modelo/marca do veículo, compatibilidade precisa e integração com distribuidores.',
+    metric: 'Zero devolução por incompatibilidade',
+  },
+  {
+    id: 'esportes',
+    name: 'Esportes & Fitness',
+    icon: 'Trophy',
+    description: 'Suplementação periódica, vestuário técnico, equipamentos e incentivo à compra recorrente.',
+    metric: '+40% de retenção no ciclo de 90 dias',
+  },
+  {
+    id: 'especializadas',
+    name: 'Lojas Especializadas',
+    icon: 'Gift',
+    description: 'Pet shops, papelarias, brinquedos, óticas e nichos com exigências específicas de catálogo e atendimento.',
+    metric: 'Presença digital profissional em menos de 48h',
+  },
+  {
+    id: 'local',
+    name: 'Varejo Local de Bairro',
+    icon: 'Store',
+    description: 'Retirada na loja (Click & Collect), entrega via motoboy no mesmo dia e pedidos diretos pelo WhatsApp.',
+    metric: '+65% de conversão nas vendas de proximidade',
+  },
+];
+
+export const JOURNEY_STEPS = [
+  {
+    number: '01',
+    phase: 'COMEÇAR',
+    title: 'Crie sua empresa na BRAND+',
+    description: 'Configuração guiada e sem complexidade técnica. Em minutos sua empresa está cadastrada e pronta para a transformação.',
+    highlight: 'Onboarding simples e assistido',
+  },
+  {
+    number: '02',
+    phase: 'VENDER',
+    title: 'Publique seus produtos e receba pedidos',
+    description: 'Sua vitrine digital no ar com catálogo atrativo, pagamentos instantâneos com PIX e cartão, e checkout rápido.',
+    highlight: 'Venda 24 horas por dia',
+  },
+  {
+    number: '03',
+    phase: 'ORGANIZAR',
+    title: 'Controle estoque, pedidos e clientes',
+    description: 'Fim do retrabalho e planilhas. Sincronização automática entre o estoque da loja física e as vendas online.',
+    highlight: 'Operação fluida sem rupturas',
+  },
+  {
+    number: '04',
+    phase: 'ANALISAR',
+    title: 'Entenda seus números com clareza',
+    description: 'Painéis visuais mostram faturamento, lucro real, produtos mais vendidos, ticket médio e comportamento do cliente.',
+    highlight: 'Decisões baseadas em dados',
+  },
+  {
+    number: '05',
+    phase: 'CRESCER',
+    title: 'Automatize e tome decisões com IA',
+    description: 'Use diagnósticos inteligentes, campanhas automáticas para clientes inativos e expanda para múltiplos canais.',
+    highlight: 'Escala sustentável e rentável',
+  },
+];
+
+export const PLAN_TIERS: PlanTier[] = [
+  {
+    id: 'start',
+    name: 'START',
+    tagline: 'Para começar no digital',
+    description: 'Ideal para lojas tradicionais que desejam estruturar sua primeira presença digital profissional com segurança.',
+    monthlyEstimate: 'Consulte os planos',
+    annualEstimate: 'Consulte os planos',
+    idealFor: 'Negócios locais e iniciantes no digital',
+    ctaText: 'Começar com Start',
+    primaryFeatures: [
+      'Loja virtual profissional personalizada',
+      'Até 500 produtos cadastrados',
+      'Checkout transparente com PIX e Cartão',
+      'Controle unificado de estoque e pedidos',
+      'Gestão de clientes e histórico básico',
+      'Acesso aos cursos fundamentais da Academy',
+      'Suporte via ticket e WhatsApp em horário comercial',
+    ],
+  },
+  {
+    id: 'growth',
+    name: 'GROWTH',
+    badge: 'Mais Escolhido',
+    popular: true,
+    tagline: 'Para negócios em crescimento',
+    description: 'Para varejistas que já vendem e precisam de automação, gestão financeira avançada e aumento de margem.',
+    monthlyEstimate: 'Consulte os planos',
+    annualEstimate: 'Consulte os planos',
+    idealFor: 'Pequenas e médias empresas em expansão',
+    ctaText: 'Experimentar Growth',
+    primaryFeatures: [
+      'Tudo do plano Start',
+      'Produtos e pedidos ilimitados',
+      'BRAND+ Intelligence com diagnósticos semanais',
+      'Controle financeiro completo e fluxo de caixa',
+      'CRM com automação de campanhas de recuperação',
+      'Emissão de notas fiscais integrada',
+      'Integrações com principais gateways e transportadoras',
+      'Acesso completo a todas as trilhas da Academy',
+      'Suporte prioritário via WhatsApp',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'PRO',
+    tagline: 'Para operações profissionais',
+    description: 'Projetado para varejistas maduros que demandam máxima eficiência, copiloto de IA avançado e multicanalidade.',
+    monthlyEstimate: 'Consulte os planos',
+    annualEstimate: 'Consulte os planos',
+    idealFor: 'Empresas consolidadas com alto volume',
+    ctaText: 'Falar com Especialista',
+    primaryFeatures: [
+      'Tudo do plano Growth',
+      'Copiloto de IA em tempo real com perguntas livres',
+      'Análise preditiva de estoque e precificação dinâmica',
+      'Gestão multi-filiais e múltiplos pontos de estoque',
+      'Controle granular de permissões por usuário',
+      'API aberta para conexões personalizadas',
+      'Gerente de sucesso da conta (CS) dedicado',
+      'Treinamentos ao vivo para sua equipe',
+    ],
+  },
+  {
+    id: 'enterprise',
+    name: 'ENTERPRISE',
+    tagline: 'Para redes e grandes operações',
+    description: 'Solução sob medida para franquias, redes de lojas e grandes atacadistas com necessidades complexas de tecnologia.',
+    monthlyEstimate: 'Sob Consulta',
+    annualEstimate: 'Sob Consulta',
+    idealFor: 'Redes de varejo, franquias e atacados',
+    ctaText: 'Falar com Consultor Enterprise',
+    primaryFeatures: [
+      'Arquitetura dedicada de alta performance',
+      'Múltiplos CNPJs e gestão centralizada de rede',
+      'SLA de 99.9% garantido em contrato',
+      'Integrações customizadas de ERPs legados',
+      'Segurança corporativa avançada e SSO',
+      'Consultoria estratégica mensal de crescimento',
+      'Suporte 24/7 com canal direto de engenharia',
+    ],
+  },
+];
+
+export const PLAN_COMPARISON_FEATURES: PlanFeature[] = [
+  // Commerce
+  { name: 'Loja Virtual Customizável', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Catálogo Digital Responsivo', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Checkout 1-Clique Otimizado', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Cupons e Promoções Dinâmicas', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Recuperação de Carrinho Abandonado', includedIn: ['growth', 'pro', 'enterprise'] },
+  { name: 'Integração com Marketplaces', includedIn: ['growth', 'pro', 'enterprise'] },
+  
+  // Gestão
+  { name: 'Controle de Estoque em Tempo Real', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Central Unificada de Pedidos', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Cadastro de Clientes e Histórico', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Múltiplos Depósitos/Estoque', includedIn: ['pro', 'enterprise'] },
+  { name: 'DRE e Gestão Financeira', includedIn: ['growth', 'pro', 'enterprise'] },
+  { name: 'Emissão Fiscal Automática', includedIn: ['growth', 'pro', 'enterprise'] },
+  { name: 'Múltiplas Lojas e CNPJs', includedIn: ['enterprise'] },
+
+  // Inteligência & IA
+  { name: 'Painel de Indicadores Operacionais', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'BRAND+ Intelligence (Diagnósticos de Margem)', includedIn: ['growth', 'pro', 'enterprise'] },
+  { name: 'Copiloto de IA em Linguagem Natural', includedIn: ['pro', 'enterprise'] },
+  { name: 'Recomendador Preditivo de Preço e Reposição', includedIn: ['pro', 'enterprise'] },
+  { name: 'Automação de Campanhas Inteligentes', includedIn: ['growth', 'pro', 'enterprise'] },
+  
+  // Academy & Suporte
+  { name: 'Acesso à BRAND+ Academy', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Trilhas Avançadas e Certificados', includedIn: ['growth', 'pro', 'enterprise'] },
+  { name: 'Suporte por WhatsApp Comercial', includedIn: ['start', 'growth', 'pro', 'enterprise'] },
+  { name: 'Gerente de Contas Dedicado', includedIn: ['pro', 'enterprise'] },
+  { name: 'SLA Garantido e Suporte 24/7', includedIn: ['enterprise'] },
+];
+
+export const INTEGRATIONS_LIST: IntegrationItem[] = [
+  // Pagamentos
+  { id: '1', name: 'PIX Instantâneo', category: 'pagamentos', description: 'Recebimento imediato com conciliação automática e QR Code dinâmico.', popularity: 99 },
+  { id: '2', name: 'Gateway de Cartões', category: 'pagamentos', description: 'Processamento de crédito e débito com antifraude inteligente integrado.', popularity: 98 },
+  { id: '3', name: 'Boleto Bancário', category: 'pagamentos', description: 'Emissão e baixa automática com registro bancário simplificado.', popularity: 90 },
+  { id: '4', name: 'Link de Pagamento', category: 'pagamentos', description: 'Geração de links seguros para fechamento de vendas diretas pelo WhatsApp.', popularity: 95 },
+
+  // Logística
+  { id: '5', name: 'Correios & Sedex', category: 'logistica', description: 'Cálculo de frete em tempo real e geração de etiquetas de postagem.', popularity: 97 },
+  { id: '6', name: 'Transportadoras Regionais', category: 'logistica', description: 'Conexão com as principais malhas de frete rodoviário e aéreo do Brasil.', popularity: 92 },
+  { id: '7', name: 'Entrega Expressa / Motoboy', category: 'logistica', description: 'Roteirização para entrega local no mesmo dia (Same Day Delivery).', popularity: 94 },
+  { id: '8', name: 'Retirada na Loja (Click & Collect)', category: 'logistica', description: 'Integração para o cliente comprar online e retirar no balcão físico.', popularity: 96 },
+
+  // ERP & PDV
+  { id: '9', name: 'Sistemas ERP de Mercado', category: 'erp', description: 'Sincronização bidirecional de produtos, clientes, estoque e pedidos.', popularity: 95 },
+  { id: '10', name: 'Frente de Caixa (PDV Físico)', category: 'pdv', description: 'Baixa instantânea de estoque a cada venda realizada no balcão físico.', popularity: 94 },
+
+  // Marketplaces
+  { id: '11', name: 'Hub de Marketplaces', category: 'marketplaces', description: 'Publicação simultânea de catálogo nos maiores canais de venda do país.', popularity: 91 },
+
+  // Fiscal
+  { id: '12', name: 'Emissor de NF-e e NFC-e', category: 'fiscal', description: 'Geração, envio e armazenamento fiscal em conformidade com as regras estaduais.', popularity: 96 },
+
+  // Marketing & Analytics
+  { id: '13', name: 'WhatsApp Business API', category: 'marketing', description: 'Disparo de status de pedidos e campanhas segmentadas com alta taxa de abertura.', popularity: 99 },
+  { id: '14', name: 'Automação de E-mail Marketing', category: 'marketing', description: 'Nutrição de leads, boas-vindas e ofertas personalizadas por comportamento.', popularity: 88 },
+  { id: '15', name: 'Google & Meta Analytics', category: 'analytics', description: 'Pixel de rastreamento, eventos de conversão e medição de retorno de anúncios.', popularity: 95 },
+];
+
+export const DEMONSTRATIVE_CASES: CaseStudy[] = [
+  {
+    id: 'case-1',
+    title: 'Transformação Digital da Bellucci Calçados',
+    companyName: 'Bellucci Calçados',
+    segment: 'Calçados & Acessórios',
+    cityState: 'Franca, SP',
+    demonstrative: true,
+    headline: 'De loja de rua tradicional a faturamento nacional integrado.',
+    challenge: 'A Bellucci operava há 14 anos apenas com loja física. Sofria com estoque desorganizado, excesso de ponta de numeração e queda no fluxo de clientes presenciais.',
+    solution: 'Implementou o ecossistema BRAND+ conectando o Commerce com a gestão unificada de estoque e utilizando a BRAND+ Intelligence para identificar produtos com melhor margem de venda.',
+    metrics: [
+      { label: 'Faturamento Digital', value: '+142%', trend: 'up' },
+      { label: 'Redução em Sobras de Grade', value: '-58%', trend: 'down' },
+      { label: 'Tempo de Expedição', value: '-65%', trend: 'down' },
+    ],
+    quote: {
+      text: 'A BRAND+ nos deu a segurança que faltava. Não é apenas ter um site; é saber exatamente quanto estamos lucrando em cada par vendido e automatizar tudo.',
+      author: 'Eduardo M.',
+      role: 'Sócio-Diretor',
+    },
+    tags: ['Calçados', 'Multi-Estoque', 'Inteligência de Margem'],
+  },
+  {
+    id: 'case-2',
+    title: 'Escala e Eficiência na Casa & Requinte',
+    companyName: 'Casa & Requinte',
+    segment: 'Casa & Decoração',
+    cityState: 'Curitiba, PR',
+    demonstrative: true,
+    headline: 'Eliminação total de rupturas e crescimento de 3.2x nas vendas.',
+    challenge: 'Trabalhava com itens pesados e frágeis, tendo alto custo de frete e perda de vendas por falta de controle preciso entre o mostruário e o depósito central.',
+    solution: 'Adotou o BRAND+ Commerce com cotação de fretes múltiplos e ativou as campanhas de automação para clientes cadastrados.',
+    metrics: [
+      { label: 'Crescimento de Vendas', value: '3.2x', trend: 'up' },
+      { label: 'Taxa de Conversão do Checkout', value: '+34%', trend: 'up' },
+      { label: 'Clientes Recorrentes', value: '+47%', trend: 'up' },
+    ],
+    quote: {
+      text: 'O cliente compra online com facilidade e nossa equipe separa o pedido em minutos com a etiqueta já impressa. Mudou o patamar da nossa empresa.',
+      author: 'Juliana S.',
+      role: 'Gerente de Operações',
+    },
+    tags: ['Decoração', 'Logística Avançada', 'Checkout Otimizado'],
+  },
+  {
+    id: 'case-3',
+    title: 'Modernização da Alvorada Autopeças',
+    companyName: 'Alvorada Peças',
+    segment: 'Autopeças & Motopeças',
+    cityState: 'Belo Horizonte, MG',
+    demonstrative: true,
+    headline: 'Catálogo digital de 12 mil itens com busca precisa e vendas via WhatsApp.',
+    challenge: 'Catálogo complexo com milhares de referências. Vendedores perdiam até 20 minutos atendendo no telefone para checar compatibilidade de peças.',
+    solution: 'Digitalização completa do catálogo com busca por código OEM e fechamento com link de pagamento BRAND+.',
+    metrics: [
+      { label: 'Tempo de Atendimento', value: '-72%', trend: 'down' },
+      { label: 'Ticket Médio', value: '+29%', trend: 'up' },
+      { label: 'Margem Bruta Média', value: '+4.5 p.p.', trend: 'up' },
+    ],
+    quote: {
+      text: 'A IA da BRAND+ nos avisou quais itens tinham giro baixo e nos deu a estratégia certa para movimentar o capital parado.',
+      author: 'Renato C.',
+      role: 'Fundador',
+    },
+    tags: ['Autopeças', 'Catálogo Massivo', 'BRAND+ Intelligence'],
+  },
+];
+
+export const ACADEMY_COURSES: AcademyCourse[] = [
+  {
+    id: 'c1',
+    title: 'Fundamentos da Transformação Digital para o Varejista',
+    slug: 'fundamentos-transformacao-digital',
+    category: 'digital',
+    level: 'Iniciante',
+    duration: '4h 30min',
+    lessonsCount: 18,
+    isPopular: true,
+    description: 'Aprenda o passo a passo para levar sua loja tradicional para o ambiente digital sem cometer os erros mais caros do mercado.',
+    instructor: 'Rodrigo Brandão',
+    instructorRole: 'Head de Varejo & Estratégia BRAND+',
+    modules: [
+      { title: 'Mindset Digital no Comércio Físico', duration: '45m', lessons: ['O novo comportamento do consumidor brasileiro', 'Omnichannel na prática'] },
+      { title: 'Estruturação do Catálogo e Fotos', duration: '1h 15m', lessons: ['Títulos que vendem', 'Fotografia com celular', 'Descrições completas'] },
+      { title: 'Logística e Atendimento Inicial', duration: '1h 10m', lessons: ['Como embalar com segurança', 'Política de trocas simplificada'] },
+    ],
+  },
+  {
+    id: 'c2',
+    title: 'Gestão de Estoque & Giro: Adeus ao Dinheiro Parado',
+    slug: 'gestao-estoque-giro',
+    category: 'estoque',
+    level: 'Intermediário',
+    duration: '5h 15min',
+    lessonsCount: 22,
+    isPopular: true,
+    description: 'Domine curvas ABC, estoque mínimo, ponto de pedido e técnicas para desovar itens estagnados com lucro.',
+    instructor: 'Mariana Duarte',
+    instructorRole: 'Especialista em Supply Chain & Gestão',
+    modules: [
+      { title: 'Curva ABC e Classificação de SKUs', duration: '1h', lessons: ['Identificando os 20% que geram 80% do lucro', 'Auditoria de inventário'] },
+      { title: 'Estratégias de Liquidação Inteligente', duration: '1h 30m', lessons: ['Combos promocionais', 'Comunicação com compradores antigos'] },
+    ],
+  },
+  {
+    id: 'c3',
+    title: 'Precificação Estratégica & Margem Real no Varejo',
+    slug: 'precificacao-estrategica-margem',
+    category: 'precificacao',
+    level: 'Intermediário',
+    duration: '3h 45min',
+    lessonsCount: 16,
+    description: 'Como calcular markup, custos fixos, variáveis, taxas de cartão e impostos sem queimar margem na promoção.',
+    instructor: 'Carlos Valente',
+    instructorRole: 'Consultor Financeiro de Varejo',
+    modules: [
+      { title: 'Custos Ocultos e Formação de Preço', duration: '1h 15m', lessons: ['Markup vs Margem Bruta', 'Impacto das taxas de antecipação'] },
+      { title: 'Precificação Competitiva sem Guerra de Preço', duration: '1h 20m', lessons: ['Valor percebido', 'Preço âncora'] },
+    ],
+  },
+  {
+    id: 'c4',
+    title: 'Dominando o BRAND+ Intelligence & Copiloto de IA',
+    slug: 'dominando-brand-intelligence-ia',
+    category: 'ia',
+    level: 'Avançado',
+    duration: '3h 10min',
+    lessonsCount: 14,
+    isPopular: true,
+    description: 'Extraia todo o potencial dos diagnósticos preditivos e da IA da BRAND+ para impulsionar suas tomadas de decisão diárias.',
+    instructor: 'Engenharia de Dados BRAND+',
+    instructorRole: 'Time de Produto BRAND+',
+    modules: [
+      { title: 'Lendo e Agindo com Diagnósticos de IA', duration: '1h', lessons: ['Como formular perguntas à IA', 'Interpretando alertas de margem'] },
+      { title: 'Automação de Respostas e Segmentação', duration: '1h 10m', lessons: ['Gatilhos preditivos', 'Ações de marketing com IA'] },
+    ],
+  },
+  {
+    id: 'c5',
+    title: 'WhatsApp Marketing & Vendas Rápidas para Varejo',
+    slug: 'whatsapp-marketing-varejo',
+    category: 'marketing',
+    level: 'Iniciante',
+    duration: '2h 50min',
+    lessonsCount: 12,
+    description: 'Scripts, catálogos e estratégias éticas para fechar vendas no WhatsApp com links de pagamento seguros.',
+    instructor: 'Fernanda Lopes',
+    instructorRole: 'Growth & CRM Specialist',
+    modules: [
+      { title: 'Configuração do Catálogo e Respostas Rápidas', duration: '50m', lessons: ['Padronização do atendimento', 'Evitando bloqueios'] },
+      { title: 'Campanhas de Reengajamento', duration: '1h', lessons: ['Clientes de 90 dias', 'Ofertas VIP'] },
+    ],
+  },
+  {
+    id: 'c6',
+    title: 'E-commerce de Alta Conversão: Do Clique ao Pedido Pago',
+    slug: 'ecommerce-alta-conversao',
+    category: 'ecommerce',
+    level: 'Intermediário',
+    duration: '4h 00min',
+    lessonsCount: 20,
+    description: 'Ajustes visuais, gatilhos de confiança, redução de atrito no checkout e políticas de frete atrativas.',
+    instructor: 'Rodrigo Brandão',
+    instructorRole: 'Head de Varejo BRAND+',
+    modules: [
+      { title: 'Anatomia da Página de Produto Perfeita', duration: '1h', lessons: ['Fotos, especificações e depoimentos', 'Botões de ação'] },
+      { title: 'Otimização do Checkout Transparente', duration: '1h 20m', lessons: ['Redução de campos', 'PIX no topo'] },
+    ],
+  },
+];
+
+export const BLOG_POSTS: BlogPost[] = [
+  {
+    id: 'b1',
+    slug: 'como-transformar-loja-fisica-em-digital',
+    title: 'Como transformar uma loja física em uma operação digital profissional em 2026',
+    excerpt: 'Guia definitivo com os 5 passos práticos para modernizar o seu varejo sem abandonar a sua essência e sem altos investimentos em TI.',
+    category: 'varejo',
+    categoryLabel: 'Varejo',
+    readTime: '6 min de leitura',
+    date: '18 Ago 2026',
+    featured: true,
+    author: {
+      name: 'Equipe Editorial BRAND+',
+      role: 'Especialistas em Transformação Digital',
+    },
+    tags: ['Varejo Físico', 'Transformação Digital', 'Gestão'],
+    content: [
+      'O varejo brasileiro vive uma de suas maiores transformações históricas. Não se trata mais de escolher entre ter uma loja física ou uma loja online — o sucesso hoje pertence ao lojista que unifica as duas experiências em uma única operação fluida.',
+      'Muitos empresários hesitam porque acreditam que o digital exige equipes gigantescas de desenvolvimento ou investimentos fora da realidade. No entanto, com plataformas all-in-one como a BRAND+, o processo tornou-se acessível e estruturado.',
+      'O primeiro passo essencial é organizar a base de produtos e unificar o estoque. Quando a sua loja física e o seu canal digital compartilham os mesmos dados em tempo real, você elimina o risco de vender itens indisponíveis.',
+      'O segundo passo é simplificar o checkout: o consumidor atual valoriza velocidade. Oferecer pagamentos por PIX instantâneo e opções de retirada no balcão físico aproxima o cliente da sua marca.',
+    ],
+  },
+  {
+    id: 'b2',
+    slug: 'por-que-seu-faturamento-cresce-mas-seu-lucro-cai',
+    title: 'Por que o faturamento da sua loja pode estar subindo enquanto sua margem despenca?',
+    excerpt: 'Entenda a armadilha do faturamento ilusório e como a análise inteligente de custos e margem por produto evita prejuízos invisíveis.',
+    category: 'gestao',
+    categoryLabel: 'Gestão & Finanças',
+    readTime: '8 min de leitura',
+    date: '14 Ago 2026',
+    featured: true,
+    author: {
+      name: 'Carlos Valente',
+      role: 'Consultor Financeiro BRAND+',
+    },
+    tags: ['Finanças', 'Margem de Lucro', 'Precificação'],
+    content: [
+      'Um dos maiores desafios no varejo é a falsa impressão de que bater recorde de vendas é sinônimo de saúde financeira. Muitas vezes, vender mais de produtos com margem negativa ou fretes mal calculados apenas acelera o consumo de caixa.',
+      'Na BRAND+, identificamos frequentemente casos em que 3 a 5 itens campeões de vendas estavam, na verdade, drenando 20% do resultado operacional por conta de aumentos recentes de custos de fornecedor não repassados ao preço.',
+      'A solução passa por ter inteligência de dados aplicada: painéis que cruzam em tempo real o custo de mercadoria vendida (CMV), taxas financeiras e comissões para alertar o gestor antes do fechamento do mês.',
+    ],
+  },
+  {
+    id: 'b3',
+    slug: 'inteligencia-artificial-aplicada-ao-varejo-pme',
+    title: 'Inteligência Artificial no Varejo: muito além de respostas automáticas genéricas',
+    excerpt: 'Como a IA preditiva está sendo usada por pequenos e médios lojistas para prever rupturas de estoque, sugerir preços e reativar clientes.',
+    category: 'inteligencia-artificial',
+    categoryLabel: 'Inteligência Artificial',
+    readTime: '7 min de leitura',
+    date: '10 Ago 2026',
+    author: {
+      name: 'Time de Engenharia BRAND+',
+      role: 'Pesquisa & Desenvolvimento',
+    },
+    tags: ['IA', 'Machine Learning', 'Inovação'],
+    content: [
+      'Quando se fala em Inteligência Artificial no comércio, muitos pensam apenas em robôs de atendimento. Mas o verdadeiro valor da IA para o pequeno e médio varejista está nos bastidores da operação.',
+      'Com o BRAND+ Intelligence, a IA analisa continuamente o histórico de movimentação do seu negócio para responder perguntas críticas como: "Quais produtos devo encomendar nesta semana?" ou "Onde estou perdendo margem?".',
+      'Essa democratização da tecnologia coloca o pequeno lojista no mesmo nível de capacidade analítica das maiores redes de varejo do país.',
+    ],
+  },
+  {
+    id: 'b4',
+    slug: 'campanhas-de-clientes-inativos-como-resgatar-vendas',
+    title: 'A estratégia dos 90 dias: como reativar clientes antigos com ofertas segmentadas',
+    excerpt: 'Descubra como transformar compradores que não compram há 3 meses em clientes fiéis com automação de marketing e dados de compra.',
+    category: 'marketing',
+    categoryLabel: 'Marketing',
+    readTime: '5 min de leitura',
+    date: '05 Ago 2026',
+    author: {
+      name: 'Fernanda Lopes',
+      role: 'Especialista em CRM',
+    },
+    tags: ['CRM', 'Automação', 'Vendas'],
+    content: [
+      'Conquistar um novo cliente custa de 5 a 7 vezes mais do que vender novamente para alguém que já conhece a sua loja. Ainda assim, a maioria dos varejistas foca 100% de sua energia em novos visitantes.',
+      'Criar uma régua de reengajamento automatizada para contatar clientes que completaram 60 ou 90 dias sem novas compras gera resultados expressivos imediatos.',
+      'Apresentando novidades da mesma categoria que o cliente comprou no passado, as taxas de conversão chegam a ser até 18% superiores às de anúncios frios.',
+    ],
+  },
+  {
+    id: 'b5',
+    slug: 'checkout-sem-atrito-segredos-da-alta-conversao',
+    title: 'Os 4 pilares de um checkout de alta conversão para o varejo brasileiro',
+    excerpt: 'Por que o excesso de etapas no carrinho faz você perder até 70% das vendas e como o PIX revolucionou a velocidade de compra.',
+    category: 'ecommerce',
+    categoryLabel: 'E-commerce',
+    readTime: '6 min de leitura',
+    date: '28 Jul 2026',
+    author: {
+      name: 'Equipe Editorial BRAND+',
+      role: 'Especialistas em E-commerce',
+    },
+    tags: ['Checkout', 'PIX', 'Conversão'],
+    content: [
+      'O abandono de carrinho é a maior dor de quem vende pela internet. Quase sempre, o motivo não é o preço do produto, mas sim a fricção no momento do pagamento.',
+      'Eliminar a exigência de cadastros gigantescos antes de calcular o frete e priorizar o PIX com chave instantânea no topo das opções aumenta a conversão média em mais de 30%.',
+    ],
+  },
+];
+
+export const HELP_CATEGORIES: HelpCategory[] = [
+  {
+    id: 'primeiros-passos',
+    name: 'Primeiros passos',
+    iconName: 'Compass',
+    description: 'Guia inicial de configuração da sua conta, empresa e dados bancários.',
+    articlesCount: 8,
+    popularQuestions: [
+      { question: 'Como iniciar a configuração da minha loja na BRAND+?', answer: 'Acesse o menu Configurações > Perfil da Empresa e siga o assistente passo a passo para preencher razão social, logotipo e dados de contato.' },
+      { question: 'Como conectar minha conta bancária para receber os pagamentos?', answer: 'No painel Financeiro > Configurações de Repasse, insira sua chave PIX ou dados de conta jurídica para ativação instantânea.' },
+    ],
+  },
+  {
+    id: 'conta',
+    name: 'Conta & Usuários',
+    iconName: 'UserCheck',
+    description: 'Gestão de permissões de colaboradores, segurança e plano contratado.',
+    articlesCount: 6,
+    popularQuestions: [
+      { question: 'Como adicionar vendedores e gerentes com permissões restritas?', answer: 'Em Configurações > Usuários, clique em "Convidar Usuário", defina o cargo e marque as áreas visíveis (ex: apenas Pedidos ou apenas Caixa).' },
+    ],
+  },
+  {
+    id: 'produtos',
+    name: 'Produtos & Catálogo',
+    iconName: 'Package',
+    description: 'Cadastro de itens, fotos, variações de cor e tamanho, e categorias.',
+    articlesCount: 14,
+    popularQuestions: [
+      { question: 'Como cadastrar produtos com múltiplas variações de grade?', answer: 'No formulário de produto, ative a opção "Possui variações" e adicione atributos como Cor e Tamanho com suas respectivas fotos e códigos de barras.' },
+      { question: 'Posso importar meu catálogo via planilha Excel?', answer: 'Sim! Utilize nosso modelo padrão CSV/Excel disponível em Produtos > Importar em Lote para cadastrar centenas de itens em segundos.' },
+    ],
+  },
+  {
+    id: 'loja',
+    name: 'Loja & Personalização',
+    iconName: 'Layout',
+    description: 'Cores da marca, banners promocionais, domínio próprio e páginas institucionais.',
+    articlesCount: 11,
+    popularQuestions: [
+      { question: 'Como configurar meu domínio próprio (ex: www.sualoja.com.br)?', answer: 'Em Loja > Domínio, adicione seu domínio registrado e aponte as entradas DNS do tipo CNAME e A conforme as instruções na tela.' },
+    ],
+  },
+  {
+    id: 'pedidos',
+    name: 'Pedidos & Expedição',
+    iconName: 'Truck',
+    description: 'Fluxo de aprovação, separação de itens, impressão de etiquetas e rastreio.',
+    articlesCount: 12,
+    popularQuestions: [
+      { question: 'Como funciona o fluxo de status de pedidos?', answer: 'Os pedidos passam automaticamente de "Aguardando Pagamento" para "Pago", liberando a impressão da etiqueta e o envio de aviso ao cliente.' },
+    ],
+  },
+  {
+    id: 'estoque',
+    name: 'Estoque & Depósitos',
+    iconName: 'Archive',
+    description: 'Balanço de inventário, alertas de estoque mínimo e sincronização.',
+    articlesCount: 9,
+    popularQuestions: [
+      { question: 'O estoque da loja física é atualizado quando vendo online?', answer: 'Sim, a baixa é instantânea e unificada, evitando vendas duplicadas ou divergências de saldo.' },
+    ],
+  },
+  {
+    id: 'financeiro',
+    name: 'Financeiro & DRE',
+    iconName: 'DollarSign',
+    description: 'Taxas, repasses, fluxo de caixa, custos fixos e relatórios de lucratividade.',
+    articlesCount: 10,
+    popularQuestions: [
+      { question: 'Onde vejo o demonstrativo de resultado (DRE) da minha empresa?', answer: 'No menu Financeiro > DRE Simplificado, você visualiza receita bruta, deduções, custos diretos de mercadoria e lucro líquido do período.' },
+    ],
+  },
+  {
+    id: 'marketing',
+    name: 'Marketing & CRM',
+    iconName: 'Megaphone',
+    description: 'Cupons, campanhas de e-mail/WhatsApp e segmentação de clientes.',
+    articlesCount: 9,
+    popularQuestions: [
+      { question: 'Como criar cupons de primeira compra ou frete grátis?', answer: 'Acesse Marketing > Cupons e defina o código, percentual de desconto, valor mínimo do pedido e data limite de validade.' },
+    ],
+  },
+  {
+    id: 'analytics',
+    name: 'Analytics & Métricas',
+    iconName: 'BarChart2',
+    description: 'Gráficos de vendas, ticket médio, produtos mais vendidos e taxa de conversão.',
+    articlesCount: 7,
+    popularQuestions: [
+      { question: 'Com que frequência os indicadores são atualizados?', answer: 'Todos os números do dashboard principal são calculados em tempo real a cada novo pedido faturado.' },
+    ],
+  },
+  {
+    id: 'academy',
+    name: 'BRAND+ Academy',
+    iconName: 'GraduationCap',
+    description: 'Como acessar aulas, emitir certificados e convidar colaboradores para estudar.',
+    articlesCount: 5,
+    popularQuestions: [
+      { question: 'Minha equipe tem acesso gratuito aos cursos da Academy?', answer: 'Sim! Usuários com contas ativas nos planos elegíveis podem assistir a todos os cursos e trilhas sem custo adicional.' },
+    ],
+  },
+  {
+    id: 'integracoes',
+    name: 'Integrações & APIs',
+    iconName: 'Cpu',
+    description: 'Conexão com ERPs de mercado, transportadoras, gateways e Webhooks.',
+    articlesCount: 15,
+    popularQuestions: [
+      { question: 'Como conectar a emissão automática de notas fiscais?', answer: 'Em Integrações > Fiscal, insira seu Certificado Digital A1 e configure a tributação padrão da sua empresa.' },
+    ],
+  },
+  {
+    id: 'seguranca',
+    name: 'Segurança & LGPD',
+    iconName: 'ShieldCheck',
+    description: 'Proteção de dados, certificados SSL, conformidade e backups.',
+    articlesCount: 6,
+    popularQuestions: [
+      { question: 'A BRAND+ está em conformidade com a LGPD?', answer: 'Sim, todos os dados são criptografados de ponta a ponta e a plataforma segue rigorosamente a Lei Geral de Proteção de Dados.' },
+    ],
+  },
+];
+
+export const COMPANY_VALUES = [
+  {
+    name: 'Obsessão pela Lucratividade Real',
+    desc: 'Não desenvolvemos recursos vazios. Tudo na BRAND+ visa proteger a margem do lojista e gerar lucro limpo.',
+  },
+  {
+    name: 'Simplicidade na Operação',
+    desc: 'Sistemas complexos geram erros e retrabalho. Construímos ferramentas intuitivas que qualquer colaborador aprende em minutos.',
+  },
+  {
+    name: 'Tecnologia sem Fricção',
+    desc: 'Arquitetura moderna e APIs integradas para que o comerciante nunca precise se preocupar com servidores ou manutenções.',
+  },
+  {
+    name: 'Inteligência Prática e Acionável',
+    desc: 'Não vomitamos números confusos. Nosso motor de IA traduz métricas em ações claras e recomendadas.',
+  },
+  {
+    name: 'Educação e Parceria Genuína',
+    desc: 'Acreditamos que o software é apenas metade do caminho. A outra metade é a capacitação contínua do time com a Academy.',
+  },
+  {
+    name: 'Segurança e Confiabilidade Máxima',
+    desc: 'Uptime de 99.9% e conformidade estrita com LGPD para que a sua empresa opere com total tranquilidade.',
+  },
+];
+
+export const BLOG_ARTICLES = [
+  {
+    id: 'b1',
+    title: 'Como transformar sua loja física em uma operação digital em 2026',
+    category: 'Varejo',
+    readTime: '6 min',
+    summary: 'O passo a passo prático para integrar estoque físico e vendas online sem risco de rupturas e com alta conversão.',
+    date: '18 Ago 2026',
+  },
+  {
+    id: 'b2',
+    title: 'Por que seu faturamento pode estar subindo enquanto o lucro líquido cai?',
+    category: 'Gestão',
+    readTime: '8 min',
+    summary: 'A armadilha dos custos invisíveis de logística e taxas que drenam a margem de contribuição dos produtos campeões de venda.',
+    date: '14 Ago 2026',
+  },
+  {
+    id: 'b3',
+    title: 'Inteligência Artificial no Varejo PME: Diagnósticos preditivos de estoque',
+    category: 'Inteligência Artificial',
+    readTime: '7 min',
+    summary: 'Como lojistas usam o BRAND+ Intelligence para identificar mercadorias paradas e calcular o ponto exato de reposição.',
+    date: '10 Ago 2026',
+  },
+  {
+    id: 'b4',
+    title: 'A estratégia de 90 dias: Como reativar clientes antigos no WhatsApp',
+    category: 'Marketing',
+    readTime: '5 min',
+    summary: 'Scripts e gatilhos de CRM para transformar compradores esporádicos em clientes fiéis com catálogo dinâmico.',
+    date: '05 Ago 2026',
+  },
+  {
+    id: 'b5',
+    title: 'Os 4 pilares de um checkout sem atrito com PIX instantâneo',
+    category: 'E-commerce',
+    readTime: '6 min',
+    summary: 'Eliminando fricções no fechamento de compra e aumentando a taxa de aprovação para mais de 92%.',
+    date: '28 Jul 2026',
+  },
+];
+
+export const FAQ_ITEMS = [
+  {
+    id: 'faq-1',
+    question: 'A BRAND+ cobra comissão sobre as minhas vendas?',
+    answer: 'Não! Ao contrário de marketplaces ou plataformas tradicionais de e-commerce, a BRAND+ não cobra nenhuma porcentagem sobre o valor das suas vendas. Você paga apenas a mensalidade fixa do seu plano.',
+  },
+  {
+    id: 'faq-2',
+    question: 'Preciso de conhecimentos técnicos para montar minha loja?',
+    answer: 'Nenhum! A BRAND+ foi construída com foco na simplicidade. O assistente de configuração guia você no cadastro de produtos, personalização de cores e conexão de pagamentos em poucos minutos.',
+  },
+  {
+    id: 'faq-3',
+    question: 'Como funciona a integração com a loja física e o estoque?',
+    answer: 'O controle de estoque é unificado em tempo real. Quando um item é vendido na loja física ou no balcão via frente de caixa, a baixa ocorre instantaneamente também no catálogo digital, evitando compras duplicadas.',
+  },
+  {
+    id: 'faq-4',
+    question: 'Como funciona o Copiloto de Inteligência Artificial?',
+    answer: 'O BRAND+ Intelligence analisa automaticamente seus dados diários de vendas, estoque e fornecedores. Ele gera alertas proativos em linguagem natural e sugere ações de precificação e reposição para maximizar o seu lucro.',
+  },
+  {
+    id: 'faq-5',
+    question: 'Posso usar meu próprio domínio na loja virtual?',
+    answer: 'Sim! Em todos os planos você pode conectar seu próprio endereço na web (ex: www.sualoja.com.br) com certificado SSL de segurança gratuito incluso.',
+  },
+  {
+    id: 'faq-6',
+    question: 'Existe contrato de fidelidade ou multa de cancelamento?',
+    answer: 'Não. Nossos planos mensais não possuem fidelidade e você pode cancelar ou alterar seu plano a qualquer momento diretamente pelo seu painel de controle.',
+  },
+];
+
