@@ -26,7 +26,30 @@ export type PageRoute =
   | '/termos'
   | '/privacidade'
   | '/login'
-  | '/criar-conta';
+  | '/criar-conta'
+  // BRAND+ Customer Portal Routes
+  | '/cliente'
+  | '/cliente/assinatura'
+  | '/cliente/plano'
+  | '/cliente/cobrancas'
+  | '/cliente/faturas'
+  | '/cliente/empresa'
+  | '/cliente/usuarios'
+  | '/cliente/seguranca'
+  | '/cliente/suporte'
+  | '/cliente/acesso'
+  // Commercial Checkout Routes
+  | '/cliente/checkout'
+  | '/cliente/checkout/conta'
+  | '/cliente/checkout/empresa'
+  | '/cliente/checkout/plano'
+  | '/cliente/checkout/pagamento'
+  | '/cliente/checkout/revisao'
+  | '/cliente/checkout/processando'
+  | '/cliente/checkout/sucesso';
+
+export * from './customer';
+
 
 export interface PlanFeature {
   name: string;

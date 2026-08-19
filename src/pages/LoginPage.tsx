@@ -48,10 +48,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
                 Redirecionando para o painel de operações BRAND+...
               </p>
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/cliente')}
                 className="w-full py-3 bg-slate-900 text-white font-bold text-xs rounded-xl"
               >
-                Voltar à Página Principal
+                Acessar Portal do Cliente
               </button>
             </div>
           ) : (
@@ -96,13 +96,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   <span>Acessando...</span>
                 ) : (
                   <>
-                    <span>Entrar no Painel</span>
+                    <span>Entrar no Portal do Cliente</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}
@@ -112,10 +112,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
                 Ainda não possui uma conta?{' '}
                 <button
                   type="button"
-                  onClick={() => navigate('/criar-conta')}
-                  className="font-bold text-orange-600 hover:underline"
+                  onClick={() => navigate('/cliente/checkout/conta')}
+                  className="font-bold text-orange-600 hover:underline cursor-pointer"
                 >
-                  Criar conta grátis
+                  Contratar e Criar Conta
                 </button>
               </div>
             </form>
