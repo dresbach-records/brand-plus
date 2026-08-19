@@ -1,116 +1,87 @@
-import { Subscription, SubscriptionStatus, PlanTierId, BillingCycle, PaymentMethodType } from '../types';
-import { getPlanById } from '../data/planCatalog';
+import { apiClient } from './api';
+import { Subscription, PlanTierId, BillingCycle, PaymentMethodType } from '../types';
 
 export interface CreateSubscriptionDTO {
-  customerId: string;
-  companyId: string;
   planId: PlanTierId;
   billingCycle: BillingCycle;
-  paymentMethodType: PaymentMethodType;
+  paymentMethodType?: PaymentMethodType;
 }
 
 class SubscriptionService {
-  async createSubscription(dto: CreateSubscriptionDTO): Promise<Subscription> {
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    const plan = getPlanById(dto.planId);
-    const price =
-      dto.billingCycle === 'annual'
-        ? plan.annualBilledTotal
-        : plan.priceMonthly;
-
-    const nextBilling = new Date();
-    if (dto.billingCycle === 'annual') {
-      nextBilling.setFullYear(nextBilling.getFullYear() + 1);
-    } else {
-      nextBilling.setMonth(nextBilling.getMonth() + 1);
-    }
-
-    const subscription: Subscription = {
-      id: `sub_${Math.random().toString(36).substring(2, 9)}`,
-      customerId: dto.customerId,
-      companyId: dto.companyId,
-      planId: dto.planId,
-      planName: plan.name,
-      status: 'pending', // Starts as pending until payment confirmation!
-      billingCycle: dto.billingCycle,
-      currentPrice: price,
-      startDate: new Date().toISOString(),
-      nextBillingDate: nextBilling.toISOString(),
-      paymentMethod: {
-        type: dto.paymentMethodType,
-        details:
-          dto.paymentMethodType === 'pix'
-            ? 'PIX Instantâneo'
-            : dto.paymentMethodType === 'credit_card'
-            ? 'Cartão de Crédito Corporativo'
-            : 'Boleto Bancário',
-      },
-    };
-
-    return subscription;
-  }
-
-  async activateSubscription(subscriptionId: string): Promise<Subscription> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-
+  async getMySubscription(): Promise<Subscription | null> {
+    const sub = await apiClient.get<any>('/subscriptions/me');
+    if (!sub) return null;
     return {
-      id: subscriptionId,
-      customerId: 'usr_default',
-      companyId: 'comp_default',
-      planId: 'growth',
-      planName: 'BRAND+ Growth',
-      status: 'active',
-      billingCycle: 'monthly',
-      currentPrice: 329,
-      startDate: new Date().toISOString(),
-      nextBillingDate: nextMonth.toISOString(),
+      id: sub.id,
+      customerId: sub.tenantId,
+      companyId: sub.tenantId,
+      planId: (sub.plan?.code?.toLowerCase() || 'start') as PlanTierId,
+      planName: sub.planName,
+      status: sub.status,
+      billingCycle: sub.billingCycle,
+      currentPrice: sub.priceMonthly,
+      startDate: sub.currentPeriodStart,
+      nextBillingDate: sub.currentPeriodEnd,
       paymentMethod: {
         type: 'pix',
-        details: 'PIX Automático',
+        details: 'PIX / Gateway',
+      },
+    };
+  }
+
+  async createSubscription(dto: CreateSubscriptionDTO): Promise<Subscription> {
+    const res = await apiClient.post<any>('/subscriptions', {
+      planCode: dto.planId.toUpperCase(),
+      billingCycle: dto.billingCycle === 'annual' ? 'yearly' : 'monthly',
+    });
+
+    return {
+      id: res.id,
+      customerId: res.tenantId,
+      companyId: res.tenantId,
+      planId: dto.planId,
+      planName: res.planName,
+      status: res.status,
+      billingCycle: dto.billingCycle,
+      currentPrice: 0,
+      startDate: res.currentPeriodStart,
+      nextBillingDate: res.currentPeriodEnd,
+      paymentMethod: {
+        type: dto.paymentMethodType || 'pix',
+        details: 'Gateway de Pagamento',
       },
     };
   }
 
   async changePlan(subscriptionId: string, newPlanId: PlanTierId, billingCycle: BillingCycle): Promise<Subscription> {
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    const plan = getPlanById(newPlanId);
-    const price = billingCycle === 'annual' ? plan.annualBilledTotal : plan.priceMonthly;
-
-    const nextBilling = new Date();
-    if (billingCycle === 'annual') {
-      nextBilling.setFullYear(nextBilling.getFullYear() + 1);
-    } else {
-      nextBilling.setMonth(nextBilling.getMonth() + 1);
-    }
+    const res = await apiClient.post<any>(`/subscriptions/${subscriptionId}/change-plan`, {
+      planCode: newPlanId.toUpperCase(),
+      billingCycle: billingCycle === 'annual' ? 'yearly' : 'monthly',
+    });
 
     return {
-      id: subscriptionId,
-      customerId: 'usr_default',
-      companyId: 'comp_default',
+      id: res.id,
+      customerId: '',
+      companyId: '',
       planId: newPlanId,
-      planName: plan.name,
-      status: 'active',
+      planName: res.planName,
+      status: res.status,
       billingCycle,
-      currentPrice: price,
+      currentPrice: 0,
       startDate: new Date().toISOString(),
-      nextBillingDate: nextBilling.toISOString(),
+      nextBillingDate: new Date().toISOString(),
       paymentMethod: {
         type: 'pix',
-        details: 'PIX Automático',
+        details: 'Gateway',
       },
     };
   }
 
   async cancelSubscription(subscriptionId: string): Promise<{ success: boolean; effectiveUntil: string }> {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const effectiveDate = new Date();
-    effectiveDate.setMonth(effectiveDate.getMonth() + 1);
+    const res = await apiClient.post<any>(`/subscriptions/${subscriptionId}/cancel`);
     return {
       success: true,
-      effectiveUntil: effectiveDate.toLocaleDateString('pt-BR'),
+      effectiveUntil: 'Fim do período vigente',
     };
   }
 }

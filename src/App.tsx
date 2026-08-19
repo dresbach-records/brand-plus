@@ -3,6 +3,7 @@ import { PageRoute } from './types';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { DemoModal } from './components/layout/DemoModal';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { CustomerProvider } from './context/CustomerContext';
 import { CheckoutProvider } from './context/CheckoutContext';
 
@@ -89,12 +90,14 @@ function AppContent({
     return <CustomerCheckoutPage currentRoute={currentRoute} navigate={navigate} />;
   }
 
-  // 2. Customer Portal Dashboard & Submodules
+// 2. Customer Portal Dashboard & Submodules (Protected)
   if (currentRoute.startsWith('/cliente')) {
     return (
-      <CustomerLayout currentRoute={currentRoute} navigate={navigate}>
-        {renderPortalContent(currentRoute, navigate)}
-      </CustomerLayout>
+      <ProtectedRoute navigate={navigate}>
+        <CustomerLayout currentRoute={currentRoute} navigate={navigate}>
+          {renderPortalContent(currentRoute, navigate)}
+        </CustomerLayout>
+      </ProtectedRoute>
     );
   }
 

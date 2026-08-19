@@ -7,13 +7,10 @@ import {
   BillingCycle,
   CheckoutState,
   PaymentSessionResponse,
-  PageRoute,
 } from '../types';
-import { PLAN_CATALOG, getPlanById } from '../data/planCatalog';
+import { getPlanById } from '../data/planCatalog';
 import { authService } from '../services/authService';
-import { customerService } from '../services/customerService';
-import { subscriptionService } from '../services/subscriptionService';
-import { paymentService } from '../services/paymentService';
+import { apiClient } from '../services/api';
 
 interface CheckoutContextType {
   state: CheckoutState;
@@ -26,7 +23,6 @@ interface CheckoutContextType {
   submitOrder: () => Promise<PaymentSessionResponse>;
   isSubmitting: boolean;
   paymentResult: PaymentSessionResponse | null;
-  confirmSimulatedPayment: () => Promise<void>;
   resetCheckout: () => void;
 }
 
@@ -73,7 +69,6 @@ const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined
 
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [account, setAccountState] = useState<AccountFormData>(() => {
-    // Only non-sensitive profile info can be cached in session if present
     try {
       const saved = sessionStorage.getItem('brandplus_checkout_account');
       if (saved) {
@@ -99,7 +94,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentResult, setPaymentResult] = useState<PaymentSessionResponse | null>(null);
 
-  // Sync non-sensitive drafts safely to sessionStorage (never passwords!)
   useEffect(() => {
     const { password, confirmPassword, ...safeAccount } = account;
     try {
@@ -133,7 +127,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setPaymentState((prev) => ({ ...prev, ...patch }));
   };
 
-  // Live order calculations
   const orderSummary = useMemo(() => {
     const selectedPlan = getPlanById(planId);
     if (billingCycle === 'annual') {
@@ -159,74 +152,44 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const submitOrder = async (): Promise<PaymentSessionResponse> => {
     setIsSubmitting(true);
     try {
-      // Try posting to Neon PostgreSQL backend API
-      try {
-        const dbRes = await fetch('/api/v1/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            account,
-            company,
-            planId,
-            billingCycle,
-            payment,
-            orderSummary,
-          }),
-        });
-
-        if (dbRes.ok) {
-          const dbData = await dbRes.json();
-          console.log('[Checkout] Saved to Neon PostgreSQL:', dbData);
-        }
-      } catch (dbErr) {
-        console.warn('[Checkout] Failed to reach /api/v1/checkout, fallback to provider:', dbErr);
-      }
-
-      // 1. Create account locally/services
-      const authRes = await authService.register({
+      // 1. Register account & tenant via API
+      await authService.register({
         fullName: account.fullName,
         email: account.email,
         phone: account.phone,
         password: account.password,
+        storeName: company.tradeName || company.corporateName,
+        cnpj: company.cnpj,
       });
 
-      // 2. Register company
-      const compRes = await customerService.registerCompany(company, authRes.customer.id);
-
-      // 3. Create initial pending subscription
-      await subscriptionService.createSubscription({
-        customerId: authRes.customer.id,
-        companyId: compRes.id,
-        planId: planId,
-        billingCycle: billingCycle,
-        paymentMethodType: payment.method,
+      // 2. Create Checkout Session via API (calculated server-side)
+      const session = await apiClient.post<any>('/checkout/sessions', {
+        planCode: planId.toUpperCase(),
+        billingCycle: billingCycle === 'annual' ? 'yearly' : 'monthly',
       });
 
-      // 4. Request payment session
-      const payRes = await paymentService.createCheckout({
-        customerId: authRes.customer.id,
-        customerName: account.fullName,
-        customerEmail: account.email,
-        customerPhone: account.phone,
-        companyCnpj: company.cnpj,
-        companyName: company.tradeName || company.corporateName,
-        planId: planId,
-        billingCycle: billingCycle,
+      // 3. Process payment via API
+      const payRes = await apiClient.post<any>('/payments/process', {
+        checkoutSessionId: session.id,
         paymentMethod: payment.method,
-        cardToken: payment.creditCard?.token,
       });
 
-      setPaymentResult(payRes);
-      return payRes;
+      const response: PaymentSessionResponse = {
+        paymentId: payRes.paymentId,
+        subscriptionId: session.id,
+        tenantId: session.tenantId,
+        status: payRes.status === 'approved' ? 'paid' : 'pending',
+        pixQrCode: payRes.pixQrCode,
+        pixCopyPaste: payRes.pixCopyPaste,
+        bankSlipUrl: payRes.boletoUrl,
+        message: 'Pedido finalizado com sucesso.',
+      };
+
+      setPaymentResult(response);
+      return response;
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const confirmSimulatedPayment = async () => {
-    if (!paymentResult) return;
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setPaymentResult((prev) => (prev ? { ...prev, status: 'paid' } : null));
   };
 
   const resetCheckout = () => {
@@ -267,7 +230,6 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         submitOrder,
         isSubmitting,
         paymentResult,
-        confirmSimulatedPayment,
         resetCheckout,
       }}
     >

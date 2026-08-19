@@ -4,11 +4,9 @@ import { PageRoute } from '../../types';
 import {
   Server,
   ExternalLink,
-  ShieldCheck,
   CheckCircle2,
   AlertTriangle,
   Lock,
-  Cpu,
   Globe,
   Database,
   RefreshCw,
@@ -24,12 +22,12 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
   const { saasAccess, subscription, tenant, company, refreshAll, isLoading } = useCustomer();
 
   const handleOpenSaaS = () => {
-    if (!saasAccess.accessEnabled || !saasAccess.accessUrl) return;
+    if (!saasAccess?.accessEnabled || !saasAccess?.accessUrl) return;
     window.open(saasAccess.accessUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const isSubActive = subscription.status === 'active' || subscription.status === 'trialing';
-  const isProvReady = tenant.provisioningStatus === 'ready';
+  const isSubActive = subscription?.status === 'active' || subscription?.status === 'trialing';
+  const isProvReady = tenant?.provisioningStatus === 'ready';
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -63,7 +61,7 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
               <span>Ambiente Dedicado em Produção</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white">
-              {company.tradeName || 'Sua Loja'} na BRAND+
+              {company?.tradeName || company?.corporateName || 'Sua Empresa'} na BRAND+
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
               O acesso operacional (PDV, Catálogo, Estoque e IA) é liberado exclusivamente após a autorização do backend.
@@ -71,7 +69,7 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
           </div>
 
           <div className="shrink-0 flex flex-col items-start sm:items-end gap-2">
-            {saasAccess.accessEnabled ? (
+            {saasAccess?.accessEnabled ? (
               <button
                 type="button"
                 id="btn-access-brand-plus-page"
@@ -93,7 +91,7 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
                   <span>ACESSAR BRAND+ (BLOQUEADO)</span>
                 </button>
 
-                {subscription.status === 'pending' || subscription.status === 'past_due' ? (
+                {subscription?.status === 'pending' || subscription?.status === 'past_due' ? (
                   <button
                     type="button"
                     onClick={() => navigate('/cliente/cobrancas')}
@@ -107,12 +105,12 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
             )}
 
             <div className="text-[11px] max-w-xs text-left sm:text-right">
-              {saasAccess.accessEnabled ? (
+              {saasAccess?.accessEnabled ? (
                 <span className="text-emerald-400 font-mono text-[10px]">
                   Liberado: {saasAccess.accessUrl}
                 </span>
               ) : (
-                <span className="text-amber-300 font-medium">{saasAccess.message}</span>
+                <span className="text-amber-300 font-medium">{saasAccess?.message || saasAccess?.reason}</span>
               )}
             </div>
           </div>
@@ -126,24 +124,24 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
               <span>URL Operacional</span>
             </div>
             <div className="font-mono text-slate-200 truncate">
-              {saasAccess.accessUrl || 'Autorização pendente'}
+              {saasAccess?.accessUrl || 'Autorização pendente'}
             </div>
           </div>
 
           <div className="p-3.5 bg-slate-800/50 rounded-xl border border-slate-700/60">
             <div className="text-slate-400 text-[10px] uppercase font-bold flex items-center gap-1.5 mb-1">
               <Database className="w-3.5 h-3.5 text-orange-400" />
-              <span>Tenant Identificador</span>
+              <span>Tenant Slug</span>
             </div>
-            <div className="font-mono text-slate-200">{tenant.slug}</div>
+            <div className="font-mono text-slate-200">{tenant?.slug || 'Indefinido'}</div>
           </div>
 
           <div className="p-3.5 bg-slate-800/50 rounded-xl border border-slate-700/60">
             <div className="text-slate-400 text-[10px] uppercase font-bold flex items-center gap-1.5 mb-1">
               <Lock className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Segurança SSO</span>
+              <span>Segurança OIDC</span>
             </div>
-            <div className="text-slate-200">OIDC Ready (Sistemas Separados)</div>
+            <div className="text-slate-200">Sistemas Separados</div>
           </div>
         </div>
       </div>
@@ -166,7 +164,7 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
               <div>
                 <div className="font-bold text-slate-900">1. Assinatura Ativa (subscriptionStatus = active)</div>
                 <div className="text-[11px] text-slate-500">
-                  Status atual: <span className="font-semibold capitalize">{subscription.status}</span> (Plano {subscription.planName})
+                  Status atual: <span className="font-semibold capitalize">{subscription?.status || 'Sem assinatura'}</span> ({subscription?.planName || 'Nenhum plano'})
                 </div>
               </div>
             </div>
@@ -186,7 +184,7 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
             <div className="flex items-center gap-2.5">
               {isProvReady ? (
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              ) : tenant.provisioningStatus === 'failed' ? (
+              ) : tenant?.provisioningStatus === 'failed' ? (
                 <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
               ) : (
                 <Clock className="w-4 h-4 text-blue-500 shrink-0" />
@@ -194,7 +192,7 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
               <div>
                 <div className="font-bold text-slate-900">2. Provisionamento do Tenant (provisioningStatus = ready)</div>
                 <div className="text-[11px] text-slate-500">
-                  Instância em nuvem ({tenant.environment}): <span className="font-semibold capitalize">{tenant.provisioningStatus}</span>
+                  Instância em nuvem ({tenant?.environment || 'produção'}): <span className="font-semibold capitalize">{tenant?.provisioningStatus || 'pendente'}</span>
                 </div>
               </div>
             </div>
@@ -202,19 +200,19 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
               className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
                 isProvReady
                   ? 'text-emerald-700 bg-emerald-100'
-                  : tenant.provisioningStatus === 'failed'
+                  : tenant?.provisioningStatus === 'failed'
                   ? 'text-rose-700 bg-rose-100'
                   : 'text-blue-700 bg-blue-100'
               }`}
             >
-              {isProvReady ? 'PRONTO' : tenant.provisioningStatus === 'failed' ? 'FALHA' : 'PREPARANDO'}
+              {isProvReady ? 'PRONTO' : tenant?.provisioningStatus === 'failed' ? 'FALHA' : 'PREPARANDO'}
             </span>
           </div>
 
           {/* CRITERION 3: BACKEND ACCESS AUTHORIZATION */}
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              {saasAccess.accessEnabled ? (
+              {saasAccess?.accessEnabled ? (
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               ) : (
                 <Lock className="w-4 h-4 text-amber-500 shrink-0" />
@@ -228,12 +226,12 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
             </div>
             <span
               className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                saasAccess.accessEnabled
+                saasAccess?.accessEnabled
                   ? 'text-emerald-700 bg-emerald-100'
                   : 'text-amber-700 bg-amber-100'
               }`}
             >
-              {saasAccess.accessEnabled ? 'LIBERADO' : 'BLOQUEADO'}
+              {saasAccess?.accessEnabled ? 'LIBERADO' : 'BLOQUEADO'}
             </span>
           </div>
         </div>
@@ -241,4 +239,3 @@ export const CustomerAccessPage: React.FC<CustomerAccessPageProps> = ({ navigate
     </div>
   );
 };
-

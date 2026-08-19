@@ -3,28 +3,23 @@ dotenv.config();
 
 export const config = {
   env: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT || '3000', 10),
-  isProduction: process.env.NODE_ENV === 'production',
-  
-  database: {
-    url: process.env.DATABASE_URL || 'postgresql://brandplus_user:secure_password@localhost:5432/brandplus_db?sslmode=require',
-    poolMin: parseInt(process.env.DB_POOL_MIN || '2', 10),
-    poolMax: parseInt(process.env.DB_POOL_MAX || '10', 10),
-  },
-
-  cors: {
-    origin: process.env.CORS_ORIGIN || '*',
-    credentials: true,
-  },
-
-  jwt: {
-    secret: process.env.JWT_SECRET || 'brand_plus_jwt_secret_production_ready_key',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  },
-
-  saas: {
-    entryUrl: process.env.SAAS_ENTRY_URL || 'https://app.brandplus.com.br/login/brand+',
-    baseUrl: process.env.SAAS_BASE_URL || 'https://app.brandplus.com.br',
-    authProtocol: 'sso_oidc' as const,
+  port: parseInt(process.env.PORT || '8000', 10),
+  databaseUrl: process.env.DATABASE_URL || '',
+  jwtSecret: process.env.JWT_SECRET || 'fallback_jwt_secret_dev_only',
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret_dev_only',
+  jwtExpiresIn: '15m',
+  jwtRefreshExpiresIn: '7d',
+  frontendUrl: process.env.FRONTEND_URL || 'https://brandplus.com.br',
+  saasEntryUrl: process.env.SAAS_ENTRY_URL || 'https://app.brandplus.com.br/login/brand+',
+  saasBaseUrl: process.env.SAAS_BASE_URL || 'https://app.brandplus.com.br',
+  apiUrl: process.env.API_URL || 'https://api.brandplus.com.br',
+  paymentProvider: process.env.PAYMENT_PROVIDER || 'stripe',
+  paymentSecret: process.env.PAYMENT_SECRET || '',
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
+  smtp: {
+    host: process.env.SMTP_HOST || 'smtp.example.com',
+    port: parseInt(process.env.SMTP_PORT || '587', 10),
+    user: process.env.SMTP_USER || '',
+    password: process.env.SMTP_PASSWORD || '',
   },
 };

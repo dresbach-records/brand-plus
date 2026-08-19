@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useCustomer } from '../../context/CustomerContext';
 import { UserAccount, UserRole, PageRoute } from '../../types';
-import { Users, UserPlus, Shield, Mail, CheckCircle2, MoreVertical, X } from 'lucide-react';
+import { UserPlus, CheckCircle2, X } from 'lucide-react';
 
 interface CustomerUsersPageProps {
   navigate: (route: PageRoute) => void;
 }
 
-export const CustomerUsersPage: React.FC<CustomerUsersPageProps> = ({ navigate }) => {
+export const CustomerUsersPage: React.FC<CustomerUsersPageProps> = () => {
   const { users } = useCustomer();
   const [userList, setUserList] = useState<UserAccount[]>(users);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -23,7 +23,7 @@ export const CustomerUsersPage: React.FC<CustomerUsersPageProps> = ({ navigate }
       name: inviteData.name,
       email: inviteData.email,
       role: inviteData.role,
-      status: 'invited',
+      status: 'active',
       lastAccess: 'Convite enviado',
     };
 
@@ -142,7 +142,7 @@ export const CustomerUsersPage: React.FC<CustomerUsersPageProps> = ({ navigate }
                   required
                   placeholder="Ex: Mariana Silveira"
                   value={inviteData.name}
-                  onChange={(e) => setInviteData({ ...inviteData, name: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInviteData({ ...inviteData, name: e.target.value })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-orange-500"
                 />
               </div>
@@ -154,7 +154,7 @@ export const CustomerUsersPage: React.FC<CustomerUsersPageProps> = ({ navigate }
                   required
                   placeholder="mariana@sualoja.com.br"
                   value={inviteData.email}
-                  onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInviteData({ ...inviteData, email: e.target.value })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-orange-500"
                 />
               </div>
@@ -163,7 +163,7 @@ export const CustomerUsersPage: React.FC<CustomerUsersPageProps> = ({ navigate }
                 <label className="block font-bold text-slate-700 mb-1">Perfil de Acesso *</label>
                 <select
                   value={inviteData.role}
-                  onChange={(e) => setInviteData({ ...inviteData, role: e.target.value as UserRole })}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInviteData({ ...inviteData, role: e.target.value as UserRole })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-orange-500"
                 >
                   <option value="manager">Gerente Operacional (Acesso ao PDV e E-commerce)</option>
