@@ -190,13 +190,18 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [users, setUsers] = useState<UserAccount[]>(defaultUsers);
   const [securitySettings] = useState<SecuritySettings>(defaultSecurity);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Derive SaaS access rules
-  const saasAccess = tenantService.checkSaaSAccess(
-    subscription.status,
-    tenant.provisioningStatus,
-    tenant.slug
+  const [saasAccess, setSaaSAccess] = useState<SaaSAccess>(() =>
+    tenantService.checkSaaSAccess(defaultSubscription.status, defaultTenant.provisioningStatus, defaultTenant.slug)
   );
+
+  const refreshSaaSAccess = async (customerId?: string, tenantId?: string, email?: string) => {
+    try {
+      const access = await tenantService.fetchSaaSAccess(customerId, tenantId, email);
+      setSaaSAccess(access);
+    } catch (e) {
+      console.warn('[CustomerContext] Error checking live SaaS access:', e);
+    }
+  };
 
   const refreshAll = async () => {
     setIsLoading(true);
@@ -204,10 +209,13 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // 1. Check local stored session
       const stored = authService.getCurrentSession();
       let queryParam = '';
-      if (stored?.customer?.id) {
-        queryParam = `?customerId=${encodeURIComponent(stored.customer.id)}`;
-      } else if (stored?.customer?.email) {
-        queryParam = `?email=${encodeURIComponent(stored.customer.email)}`;
+      const cId = stored?.customer?.id || customer?.id;
+      const cEmail = stored?.customer?.email || customer?.email;
+
+      if (cId) {
+        queryParam = `?customerId=${encodeURIComponent(cId)}`;
+      } else if (cEmail) {
+        queryParam = `?email=${encodeURIComponent(cEmail)}`;
       }
 
       // 2. Fetch live customer profile from Neon PostgreSQL API
@@ -224,7 +232,10 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         console.warn('[CustomerContext] Live profile fetch fallback:', profileErr);
       }
 
-      // 3. Fetch invoices
+      // 3. Fetch authoritative SaaS access from backend (GET /api/v1/saas/access)
+      await refreshSaaSAccess(cId, tenant?.id, cEmail);
+
+      // 4. Fetch invoices
       const currentCompId = company?.id || 'comp_requinte_001';
       const invs = await billingService.getInvoices(currentCompId);
       setInvoices(invs);
@@ -268,10 +279,12 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const setDemoStatus = (status: SubscriptionStatus, provStatus?: ProvisioningStatus) => {
+    const newProv = provStatus || tenant.provisioningStatus;
     setSubscription((prev) => ({ ...prev, status }));
     if (provStatus) {
       setTenant((prev) => ({ ...prev, provisioningStatus: provStatus }));
     }
+    setSaaSAccess(tenantService.checkSaaSAccess(status, newProv, tenant.slug));
   };
 
   const setSessionData = (data: {

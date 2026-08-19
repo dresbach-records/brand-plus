@@ -1,6 +1,5 @@
 import React from 'react';
 import { useCustomer } from '../../context/CustomerContext';
-import { SAAS_APP_URL } from '../../config/env';
 import { PageRoute } from '../../types';
 import {
   ExternalLink,
@@ -11,6 +10,8 @@ import {
   Server,
   Layers,
   Lock,
+  AlertTriangle,
+  Loader2,
 } from 'lucide-react';
 
 interface SaaSAccessCardProps {
@@ -22,9 +23,56 @@ export const SaaSAccessCard: React.FC<SaaSAccessCardProps> = ({ navigate, compac
   const { saasAccess, subscription, tenant } = useCustomer();
 
   const handleOpenSaaS = () => {
-    if (!saasAccess.hasAccess) return;
-    window.open(SAAS_APP_URL, '_blank', 'noopener,noreferrer');
+    if (!saasAccess.accessEnabled || !saasAccess.accessUrl) return;
+    window.open(saasAccess.accessUrl, '_blank', 'noopener,noreferrer');
   };
+
+  const getStatusDisplay = () => {
+    if (saasAccess.accessEnabled) {
+      return {
+        badgeText: 'ONLINE & AUTORIZADO',
+        badgeColor: 'text-emerald-400 bg-emerald-950/60 border-emerald-800',
+        dotColor: 'bg-emerald-400',
+        message: 'Ambiente ativo, homologado e liberado pelo backend.',
+      };
+    }
+
+    if (subscription.status === 'pending') {
+      return {
+        badgeText: 'PAGAMENTO PENDENTE',
+        badgeColor: 'text-amber-400 bg-amber-950/60 border-amber-800',
+        dotColor: 'bg-amber-400',
+        message: 'Seu ambiente será liberado após a confirmação do pagamento.',
+      };
+    }
+
+    if (tenant.provisioningStatus === 'provisioning' || tenant.provisioningStatus === 'pending') {
+      return {
+        badgeText: 'PREPARANDO AMBIENTE',
+        badgeColor: 'text-blue-400 bg-blue-950/60 border-blue-800',
+        dotColor: 'bg-blue-400',
+        message: 'Estamos preparando seu ambiente BRAND+.',
+      };
+    }
+
+    if (tenant.provisioningStatus === 'failed') {
+      return {
+        badgeText: 'FALHA DE ATIVAÇÃO',
+        badgeColor: 'text-rose-400 bg-rose-950/60 border-rose-800',
+        dotColor: 'bg-rose-400',
+        message: 'Não foi possível preparar seu ambiente. Nossa equipe precisa verificar a ativação.',
+      };
+    }
+
+    return {
+      badgeText: 'ACESSO BLOQUEADO',
+      badgeColor: 'text-amber-400 bg-amber-950/60 border-amber-800',
+      dotColor: 'bg-amber-400',
+      message: saasAccess.message || 'Acesso restrito pelo backend de autorização.',
+    };
+  };
+
+  const status = getStatusDisplay();
 
   if (compact) {
     return (
@@ -36,21 +84,23 @@ export const SaaSAccessCard: React.FC<SaaSAccessCardProps> = ({ navigate, compac
           <div>
             <div className="text-xs font-bold text-white flex items-center gap-2">
               <span>SaaS Operacional BRAND+</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className={`w-2 h-2 rounded-full ${status.dotColor} animate-pulse`} />
             </div>
             <div className="text-[11px] text-slate-400">
-              {saasAccess.hasAccess ? 'Ambiente Ativo e Pronto' : saasAccess.reason}
+              {saasAccess.accessEnabled ? 'Ambiente Liberado' : status.message}
             </div>
           </div>
         </div>
 
         <button
           type="button"
-          disabled={!saasAccess.hasAccess}
+          id="btn-compact-saas-access"
+          disabled={!saasAccess.accessEnabled}
           onClick={handleOpenSaaS}
-          className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+          title={status.message}
+          className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm"
         >
-          <span>Acessar</span>
+          <span>ACESSAR BRAND+</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -68,54 +118,65 @@ export const SaaSAccessCard: React.FC<SaaSAccessCardProps> = ({ navigate, compac
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">
               Ambiente Operacional Dedicado
             </span>
-            {saasAccess.hasAccess ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>ONLINE</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-950/60 px-2.5 py-1 rounded-full border border-amber-800">
-                <Clock className="w-3 h-3" />
-                <span>BLOQUEADO</span>
-              </span>
-            )}
+            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${status.badgeColor}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${status.dotColor} animate-pulse`} />
+              <span>{status.badgeText}</span>
+            </span>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black text-white">
             Acesse o Sistema Operacional BRAND+
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
-            Acesse o PDV de frente de caixa, loja virtual, catálogo de produtos, relatórios fiscais e o Copiloto de IA da sua loja.
+            Acesse o PDV de frente de caixa, catálogo de produtos, relatórios fiscais, pedidos omnichannel e o Copiloto de IA da sua loja.
           </p>
         </div>
 
-        {/* ACCESS BUTTON */}
+        {/* ACCESS BUTTON & BACKEND VERIFICATION INFO */}
         <div className="shrink-0 flex flex-col items-start md:items-end gap-2">
-          {saasAccess.hasAccess ? (
+          {saasAccess.accessEnabled ? (
             <button
               type="button"
+              id="btn-access-brand-plus-primary"
               onClick={handleOpenSaaS}
-              className="w-full sm:w-auto px-6 py-4 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer group"
+              className="w-full sm:w-auto px-7 py-4 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer group"
             >
-              <span>ACESSAR MINHA BRAND+</span>
+              <span>ACESSAR BRAND+</span>
               <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => navigate?.('/cliente/cobrancas')}
-              className="w-full sm:w-auto px-6 py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <AlertCircle className="w-4 h-4" />
-              <span>Regularizar Pagamento</span>
-            </button>
+            <div className="flex flex-col gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                id="btn-access-brand-plus-disabled"
+                disabled
+                title={status.message}
+                className="w-full sm:w-auto px-6 py-3.5 bg-slate-800/80 text-slate-400 font-extrabold text-xs rounded-xl border border-slate-700/80 transition-all flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+              >
+                <Lock className="w-4 h-4 text-amber-400" />
+                <span>ACESSAR BRAND+ (BLOQUEADO)</span>
+              </button>
+
+              {subscription.status === 'pending' || subscription.status === 'past_due' ? (
+                <button
+                  type="button"
+                  onClick={() => navigate?.('/cliente/cobrancas')}
+                  className="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>Ver Fatura Pendente</span>
+                </button>
+              ) : null}
+            </div>
           )}
 
-          <div className="text-[11px] text-slate-400 font-mono">
-            {saasAccess.hasAccess ? (
-              <span>URL: {SAAS_APP_URL}</span>
+          <div className="text-[11px] text-slate-400 max-w-sm text-left md:text-right">
+            {saasAccess.accessEnabled ? (
+              <span className="font-mono text-emerald-400 text-[10px]">
+                URL autorizada: {saasAccess.accessUrl}
+              </span>
             ) : (
-              <span className="text-amber-400">{saasAccess.reason}</span>
+              <span className="text-amber-300 font-medium text-[11px]">{status.message}</span>
             )}
           </div>
         </div>
@@ -128,18 +189,21 @@ export const SaaSAccessCard: React.FC<SaaSAccessCardProps> = ({ navigate, compac
           <span className="font-semibold text-slate-200">{tenant.slug}.brandplus.com.br</span>
         </div>
         <div>
-          <span className="text-[10px] text-slate-400 block uppercase font-bold">Plano Contratado:</span>
-          <span className="font-semibold text-slate-200">{subscription.planName}</span>
+          <span className="text-[10px] text-slate-400 block uppercase font-bold">Status da Assinatura:</span>
+          <span className="font-semibold text-slate-200 capitalize">{subscription.status}</span>
         </div>
         <div>
-          <span className="text-[10px] text-slate-400 block uppercase font-bold">Protocolo de Autenticação:</span>
-          <span className="font-semibold text-slate-200">SSO Corporativo (OIDC)</span>
+          <span className="text-[10px] text-slate-400 block uppercase font-bold">Status de Provisionamento:</span>
+          <span className="font-semibold text-slate-200 capitalize">{tenant.provisioningStatus}</span>
         </div>
         <div>
-          <span className="text-[10px] text-slate-400 block uppercase font-bold">Disponibilidade (SLA):</span>
-          <span className="font-semibold text-emerald-400">99.9% Operacional</span>
+          <span className="text-[10px] text-slate-400 block uppercase font-bold">Autorização Backend:</span>
+          <span className={`font-semibold ${saasAccess.accessEnabled ? 'text-emerald-400' : 'text-amber-400'}`}>
+            {saasAccess.accessEnabled ? 'Liberado (HTTP 200)' : 'Restrito'}
+          </span>
         </div>
       </div>
     </div>
   );
 };
+

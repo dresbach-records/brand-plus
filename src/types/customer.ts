@@ -119,13 +119,17 @@ export interface Tenant {
 }
 
 export interface SaaSAccess {
-  hasAccess: boolean;
-  reason?: string;
-  saasAppUrl: string;
+  accessEnabled: boolean;
+  hasAccess: boolean; // Alias for backward compatibility
+  accessUrl: string | null;
+  saasAppUrl?: string; // Alias for backward compatibility
+  tenantId?: string;
   tenantSlug?: string;
-  authProvider: 'sso_oidc';
-  provisioningStatus: ProvisioningStatus;
-  subscriptionStatus: SubscriptionStatus;
+  authProvider?: 'sso_oidc';
+  provisioningStatus: ProvisioningStatus | string;
+  subscriptionStatus: SubscriptionStatus | string;
+  message: string;
+  reason?: string; // Alias for message
 }
 
 export interface UserAccount {

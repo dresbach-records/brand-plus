@@ -90,11 +90,18 @@ export const CustomerHeader: React.FC<CustomerHeaderProps> = ({
           <SubscriptionStatusBadge status={subscription.status} />
         </div>
 
-        {/* SAAS DIRECT BUTTON */}
+        {/* SAAS DIRECT BUTTON - AUTHORIZED BY BACKEND */}
         <button
           type="button"
-          onClick={() => window.open(SAAS_APP_URL, '_blank', 'noopener,noreferrer')}
-          className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-2xs"
+          id="btn-header-saas-access"
+          disabled={!saasAccess.accessEnabled}
+          onClick={() => {
+            if (saasAccess.accessEnabled && saasAccess.accessUrl) {
+              window.open(saasAccess.accessUrl, '_blank', 'noopener,noreferrer');
+            }
+          }}
+          title={saasAccess.message}
+          className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
         >
           <span>Abrir SaaS</span>
           <ExternalLink className="w-3 h-3 text-orange-400" />

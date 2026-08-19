@@ -51,7 +51,11 @@ export const CustomerSidebar: React.FC<CustomerSidebarProps> = ({
   };
 
   const handleOpenSaaS = () => {
-    window.open(SAAS_APP_URL, '_blank', 'noopener,noreferrer');
+    if (saasAccess.accessEnabled && saasAccess.accessUrl) {
+      window.open(saasAccess.accessUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      handleNav('/cliente/acesso');
+    }
   };
 
   const handleLogout = () => {
@@ -111,14 +115,26 @@ export const CustomerSidebar: React.FC<CustomerSidebarProps> = ({
       <div className="p-4 border-t border-slate-800 space-y-2 bg-slate-950/40">
         <button
           type="button"
+          id="btn-sidebar-saas-access"
           onClick={handleOpenSaaS}
-          className="w-full py-2.5 px-3.5 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs rounded-xl transition-all flex items-center justify-between group shadow-sm cursor-pointer"
+          title={saasAccess.message}
+          className={`w-full py-2.5 px-3.5 text-white font-extrabold text-xs rounded-xl transition-all flex items-center justify-between group shadow-sm cursor-pointer ${
+            saasAccess.accessEnabled
+              ? 'bg-orange-600 hover:bg-orange-500'
+              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+          }`}
         >
-          <div className="flex items-center gap-2">
-            <Server className="w-4 h-4" />
-            <span>Abrir BRAND+ SaaS</span>
+          <div className="flex items-center gap-2 truncate">
+            <Server className={`w-4 h-4 shrink-0 ${saasAccess.accessEnabled ? 'text-white' : 'text-amber-400'}`} />
+            <span className="truncate">
+              {saasAccess.accessEnabled ? 'ACESSAR BRAND+' : 'Status do SaaS'}
+            </span>
           </div>
-          <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          {saasAccess.accessEnabled ? (
+            <ExternalLink className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform text-orange-200" />
+          ) : (
+            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+          )}
         </button>
 
         <button

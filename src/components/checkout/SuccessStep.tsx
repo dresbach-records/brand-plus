@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useCheckout } from '../../context/CheckoutContext';
 import { useCustomer } from '../../context/CustomerContext';
-import { SAAS_APP_URL } from '../../config/env';
 import { PageRoute } from '../../types';
 import { getPlanById } from '../../data/planCatalog';
 import {
@@ -14,6 +13,7 @@ import {
   Layers,
   ArrowRight,
   LayoutDashboard,
+  Lock,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -23,7 +23,7 @@ interface SuccessStepProps {
 
 export const SuccessStep: React.FC<SuccessStepProps> = ({ navigate }) => {
   const { state } = useCheckout();
-  const { customer, company, tenant } = useCustomer();
+  const { customer, company, tenant, saasAccess } = useCustomer();
   const plan = getPlanById(state.planId);
 
   useEffect(() => {
@@ -38,7 +38,11 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({ navigate }) => {
   }, []);
 
   const handleOpenSaaS = () => {
-    window.open(SAAS_APP_URL, '_blank', 'noopener,noreferrer');
+    if (saasAccess.accessEnabled && saasAccess.accessUrl) {
+      window.open(saasAccess.accessUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      navigate('/cliente/acesso');
+    }
   };
 
   return (
@@ -107,19 +111,33 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({ navigate }) => {
         </p>
 
         <div className="pt-2">
-          <button
-            type="button"
-            onClick={handleOpenSaaS}
-            className="w-full sm:w-auto px-8 py-4 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-sm rounded-xl shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <span>ACESSAR MINHA BRAND+</span>
-            <ExternalLink className="w-4 h-4" />
-          </button>
+          {saasAccess.accessEnabled ? (
+            <button
+              type="button"
+              id="btn-checkout-success-saas"
+              onClick={handleOpenSaaS}
+              className="w-full sm:w-auto px-8 py-4 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-sm rounded-xl shadow-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>ACESSAR BRAND+</span>
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => navigate('/cliente')}
+              className="w-full sm:w-auto px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm rounded-xl shadow transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Ir para a Área do Cliente</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         <div className="text-[11px] text-slate-400 font-mono pt-2">
-          Endereço do SaaS:{' '}
-          <span className="text-orange-400">{SAAS_APP_URL}</span>
+          Status de Liberação:{' '}
+          <span className={saasAccess.accessEnabled ? 'text-emerald-400' : 'text-amber-400'}>
+            {saasAccess.accessEnabled ? 'Autorizado pelo Backend' : saasAccess.message}
+          </span>
         </div>
       </div>
 
@@ -128,7 +146,7 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({ navigate }) => {
         <button
           type="button"
           onClick={() => navigate('/cliente')}
-          className="w-full sm:w-auto py-3 px-6 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full sm:w-auto py-3 px-6 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <LayoutDashboard className="w-4 h-4 text-slate-600" />
           <span>Ir para o Portal do Cliente</span>
@@ -137,7 +155,7 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({ navigate }) => {
         <button
           type="button"
           onClick={() => navigate('/cliente/assinatura')}
-          className="w-full sm:w-auto py-3 px-6 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full sm:w-auto py-3 px-6 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <Layers className="w-4 h-4 text-slate-600" />
           <span>Gerenciar Assinatura & Faturas</span>
@@ -146,3 +164,4 @@ export const SuccessStep: React.FC<SuccessStepProps> = ({ navigate }) => {
     </div>
   );
 };
+

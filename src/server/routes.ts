@@ -1,7 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { query, pool } from './db';
+import { getSaaSAccess, SAAS_CONFIG } from '../../backend-api';
 
 export const apiRouter = Router();
+
+/**
+ * GET /api/v1/saas/access
+ * Authoritative endpoint to verify and evaluate operational SaaS access
+ */
+apiRouter.get('/saas/access', getSaaSAccess);
+
 
 /**
  * Health check & DB connection diagnostics
