@@ -1,0 +1,179 @@
+// Prisma Schema for BRAND+ Multi-Tenant SaaS Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubscriptionStatus {
+  active
+  pending
+  trialing
+  past_due
+  suspended
+  cancelled
+  expired
+}
+
+enum ProvisioningStatus {
+  pending
+  provisioning
+  ready
+  failed
+}
+
+enum InvoiceStatus {
+  paid
+  pending
+  past_due
+  failed
+  refunded
+}
+
+enum UserRole {
+  owner
+  admin
+  manager
+  operator
+  accountant
+}
+
+model Customer {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  phone        String?
+  document     String?        // CPF or CNPJ
+  avatarUrl    String?
+  passwordHash String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  companies    Company[]
+  tenants      Tenant[]
+  subscriptions Subscription[]
+  userAccounts UserAccount[]
+  accessLogs   SaaSAccessLog[]
+
+  @@map("customers")
+}
+
+model Company {
+  id           String         @id @default(cuid())
+  customerId   String
+  legalName    String         // Razão Social
+  tradeName    String         // Nome Fantasia
+  cnpj         String         @unique
+  ie           String?        // Inscrição Estadual
+  segment      String         @default("retail")
+  annualTurnover String?
+  taxRegime    String         @default("simples_nacional")
+  city         String?
+  state        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  customer     Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenants      Tenant[]
+  invoices     Invoice[]
+
+  @@map("companies")
+}
+
+model Tenant {
+  id                 String             @id @default(cuid())
+  ownerId            String
+  companyId          String?
+  slug               String             @unique
+  clusterRegion      String             @default("sa-east-1")
+  databaseHost       String?
+  environment        String             @default("production")
+  status             String             @default("active")
+  provisioningStatus ProvisioningStatus @default(pending)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  owner              Customer           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  company            Company?           @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  accessLogs         SaaSAccessLog[]
+
+  @@map("tenants")
+}
+
+model Subscription {
+  id             String             @id @default(cuid())
+  customerId     String
+  planId         String
+  planName       String
+  billingCycle   String             @default("monthly")
+  priceMonthly   Float
+  priceYearly    Float?
+  status         SubscriptionStatus @default(active)
+  currentPeriodStart DateTime       @default(now())
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean        @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  customer       Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  invoices       Invoice[]
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id             String         @id @default(cuid())
+  subscriptionId String?
+  companyId      String?
+  amount         Float
+  currency       String         @default("BRL")
+  status         InvoiceStatus  @default(paid)
+  paymentMethod  String         @default("pix")
+  issueDate      DateTime       @default(now())
+  dueDate        DateTime
+  paidAt         DateTime?
+  pdfUrl         String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  subscription   Subscription?  @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  company        Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@map("invoices")
+}
+
+model UserAccount {
+  id             String         @id @default(cuid())
+  customerId     String
+  name           String
+  email          String         @unique
+  role           UserRole       @default(owner)
+  status         String         @default("active")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("user_accounts")
+}
+
+model SaaSAccessLog {
+  id             String         @id @default(cuid())
+  customerId     String
+  tenantId       String
+  accessGranted  Boolean
+  accessUrl      String?
+  ipAddress      String?
+  userAgent      String?
+  reason         String?
+  createdAt      DateTime       @default(now())
+
+  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("saas_access_logs")
+}
