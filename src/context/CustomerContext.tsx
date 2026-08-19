@@ -16,6 +16,7 @@ import {
 import { tenantService } from '../services/tenantService';
 import { subscriptionService } from '../services/subscriptionService';
 import { billingService } from '../services/billingService';
+import { authService } from '../services/authService';
 
 interface CustomerContextType {
   customer: Customer;
@@ -32,6 +33,15 @@ interface CustomerContextType {
   cancelSubscription: () => Promise<string>;
   setDemoStatus: (status: SubscriptionStatus, provStatus?: ProvisioningStatus) => void;
   refreshAll: () => Promise<void>;
+  setSessionData: (data: {
+    customer?: Customer;
+    company?: Company;
+    subscription?: Subscription;
+    tenant?: Tenant;
+    invoices?: Invoice[];
+    users?: UserAccount[];
+  }) => void;
+  logout: () => void;
 }
 
 const defaultCustomer: Customer = {
@@ -191,9 +201,18 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const refreshAll = async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch live customer profile from Neon PostgreSQL API
+      // 1. Check local stored session
+      const stored = authService.getCurrentSession();
+      let queryParam = '';
+      if (stored?.customer?.id) {
+        queryParam = `?customerId=${encodeURIComponent(stored.customer.id)}`;
+      } else if (stored?.customer?.email) {
+        queryParam = `?email=${encodeURIComponent(stored.customer.email)}`;
+      }
+
+      // 2. Fetch live customer profile from Neon PostgreSQL API
       try {
-        const profileRes = await fetch('/api/v1/customer/profile');
+        const profileRes = await fetch(`/api/v1/customer/profile${queryParam}`);
         if (profileRes.ok) {
           const data = await profileRes.json();
           if (data.customer) setCustomer(data.customer);
@@ -205,8 +224,9 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         console.warn('[CustomerContext] Live profile fetch fallback:', profileErr);
       }
 
-      // 2. Fetch invoices
-      const invs = await billingService.getInvoices(company.id);
+      // 3. Fetch invoices
+      const currentCompId = company?.id || 'comp_requinte_001';
+      const invs = await billingService.getInvoices(currentCompId);
       setInvoices(invs);
     } finally {
       setIsLoading(false);
@@ -214,6 +234,16 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   useEffect(() => {
+    // Hydrate immediately from stored session if present
+    const stored = authService.getCurrentSession();
+    if (stored) {
+      if (stored.customer) setCustomer(stored.customer);
+      if (stored.company) setCompany(stored.company);
+      if (stored.subscription) setSubscription(stored.subscription);
+      if (stored.tenant) setTenant(stored.tenant);
+      if (stored.invoices) setInvoices(stored.invoices);
+      if (stored.users) setUsers(stored.users);
+    }
     refreshAll();
   }, []);
 
@@ -244,6 +274,44 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const setSessionData = (data: {
+    customer?: Customer;
+    company?: Company;
+    subscription?: Subscription;
+    tenant?: Tenant;
+    invoices?: Invoice[];
+    users?: UserAccount[];
+  }) => {
+    if (data.customer) setCustomer(data.customer);
+    if (data.company) setCompany(data.company);
+    if (data.subscription) setSubscription(data.subscription);
+    if (data.tenant) setTenant(data.tenant);
+    if (data.invoices) setInvoices(data.invoices);
+    if (data.users) setUsers(data.users);
+
+    const existing = authService.getCurrentSession() || {
+      token: `jwt_${Date.now()}`,
+      customer: data.customer || defaultCustomer,
+    };
+    authService.saveSession({
+      ...existing,
+      customer: data.customer || existing.customer,
+      company: data.company || existing.company,
+      subscription: data.subscription || existing.subscription,
+      tenant: data.tenant || existing.tenant,
+      invoices: data.invoices || existing.invoices,
+      users: data.users || existing.users,
+    });
+  };
+
+  const logout = () => {
+    authService.logout();
+    setCustomer(defaultCustomer);
+    setCompany(defaultCompany);
+    setSubscription(defaultSubscription);
+    setTenant(defaultTenant);
+  };
+
   return (
     <CustomerContext.Provider
       value={{
@@ -261,6 +329,8 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         cancelSubscription,
         setDemoStatus,
         refreshAll,
+        setSessionData,
+        logout,
       }}
     >
       {children}
